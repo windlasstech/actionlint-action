@@ -35,6 +35,16 @@ jobs:
         with:
           paths: test/fixtures/valid/.github/workflows/*.yml
 
+      - name: Test multiline paths input
+        uses: ./
+        with:
+          paths: |
+            test/fixtures/valid/.github/workflows/valid.yml
+            test/fixtures/dash-leading/.github/workflows/valid.yml
+
+      - name: Test empty paths auto-discovery
+        uses: ./
+
       - name: Prepare dash-leading path fixture
         run: cp test/fixtures/dash-leading/.github/workflows/valid.yml ./-dash-leading-valid.yml
 
@@ -84,10 +94,45 @@ jobs:
           pyflakes: ""
           paths: test/fixtures/valid/.github/workflows/valid.yml
 
-      - name: Test no-color/oneline/format inputs
-        uses: ./
-        with:
-          no-color: false
-          oneline: true
-          format: '{{range $err := .}}{{println $err.Message}}{{end}}'
-          paths: test/fixtures/valid/.github/workflows/valid.yml
+      - name: Build local action image for output assertions
+        run: docker build --tag actionlint-action:self-test .
+
+      - name: Assert no-color/oneline/format output
+        run: |
+          set +e
+          docker run --rm \
+            --volume "$PWD:/github/workspace" \
+            --workdir /github/workspace \
+            --env INPUT_NO_COLOR=true \
+            --env INPUT_ONELINE=true \
+            --env 'INPUT_FORMAT={{range $err := .}}{{println $err.Message}}{{end}}' \
+            --env INPUT_PATHS=test/fixtures/invalid/.github/workflows/invalid.yml \
+            actionlint-action:self-test >output.txt 2>error.txt
+          status=$?
+          set -e
+
+          if [ "$status" -ne 1 ]; then
+            printf 'expected actionlint exit 1, got %s\n' "$status" >&2
+            cat output.txt >&2
+            cat error.txt >&2
+            exit 1
+          fi
+
+          expected='unexpected key "foo" for "workflow" section. expected one of "concurrency", "defaults", "env", "jobs", "name", "on", "permissions", "run-name"'
+          actual=$(cat output.txt)
+
+          if [ "$actual" != "$expected" ]; then
+            printf 'unexpected formatted output:\n%s\n' "$actual" >&2
+            exit 1
+          fi
+
+          if grep -q $'\033' output.txt error.txt; then
+            printf 'expected no ANSI escape sequences in output\n' >&2
+            exit 1
+          fi
+
+          if [ -s error.txt ]; then
+            printf 'expected empty stderr, got:\n' >&2
+            cat error.txt >&2
+            exit 1
+          fi
