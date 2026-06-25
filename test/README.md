@@ -1,0 +1,72 @@
+# Test Fixtures
+
+This directory contains fixed test inputs (fixtures) for the `actionlint-action` self-test workflow. They define the behavioral contract of the wrapper action before any production code is implemented.
+
+## Why fixtures?
+
+The fixtures follow a test-driven approach: the expected behavior is captured first, and the wrapper implementation is then verified against these fixtures. This makes it possible to run the local action (`uses: ./`) in a GitHub Actions workflow and assert specific outcomes for each scenario.
+
+## Fixture layout
+
+```text
+test/
+└── fixtures/
+    ├── valid/
+    │   └── .github/workflows/valid.yml
+    ├── invalid/
+    │   └── .github/workflows/invalid.yml
+    └── config/
+        ├── .github/workflows/ignored.yml
+        └── .github/actionlint.yaml
+```
+
+## Fixtures
+
+### `valid/.github/workflows/valid.yml`
+
+A minimal, syntactically valid GitHub Actions workflow.
+
+- **Purpose**: Verify the happy path.
+- **Expected outcome**: `actionlint` exits `0` with no findings.
+
+### `invalid/.github/workflows/invalid.yml`
+
+A workflow that contains a structural error.
+
+- **Purpose**: Verify the failure path.
+- **Expected outcome**: `actionlint` exits `1` because of the unknown `foo` key at the workflow level.
+- **Known error**: `unexpected key "foo" for "workflow" section`.
+
+### `config/.github/workflows/ignored.yml`
+
+A workflow that contains an error matching the ignore rule in the paired config file.
+
+- **Purpose**: Verify the `config-file` input and the `ignore` input.
+- **Expected outcome**:
+  - Without config: `actionlint` exits `1`.
+  - With `config-file: test/fixtures/config/.github/actionlint.yaml`: `actionlint` exits `0`.
+  - With `ignore: 'unexpected key "foo" for "workflow" section.*'`: `actionlint` exits `0`.
+
+### `config/.github/actionlint.yaml`
+
+The actionlint configuration file paired with `ignored.yml`.
+
+- **Purpose**: Suppress the known error in `ignored.yml` so the config-file scenario passes.
+- **Rule**: ignores errors matching `unexpected key "foo" for "workflow" section`.
+
+## How they are used
+
+The self-test workflow at `.github/workflows/actionlint-self-test.yml` runs the local action against each fixture and asserts the expected outcome. This ensures that:
+
+- Required inputs map correctly to `actionlint` CLI arguments.
+- Optional inputs such as `config-file`, `ignore`, `shellcheck`, `pyflakes`, `format`, `no-color`, and `oneline` behave as documented.
+- The wrapper exits with the same code as the underlying `actionlint` process.
+
+## Adding new fixtures
+
+When adding a new fixture:
+
+1. Place it under the appropriate subdirectory.
+2. Document its purpose and expected outcome in this file.
+3. Add a corresponding step to `.github/workflows/actionlint-self-test.yml`.
+4. Verify the fixture locally with the `actionlint` CLI before committing.
