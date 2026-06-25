@@ -85,14 +85,7 @@ while IFS= read -r line || [ -n "$line" ]; do
 		path_matches="$tmp_dir/path-matches"
 		: >"$path_matches"
 
-		if [ -d "$line" ]; then
-			find "$line" -type f \( \
-				-path "$line/*.yml" -o \
-				-path "$line/*.yaml" -o \
-				-path '*/.github/workflows/*.yml' -o \
-				-path '*/.github/workflows/*.yaml' \
-			\) | sort >"$path_matches"
-		elif has_glob "$line"; then
+		if has_glob "$line"; then
 			find . -type f \( -path "./$line" -o -path "$line" \) | sort >"$path_matches"
 		fi
 

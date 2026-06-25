@@ -43,10 +43,16 @@ jobs:
         with:
           paths: -dash-leading-valid.yml
 
-      - name: Test directory paths input
+      - name: Test directory paths input fails like actionlint CLI
+        id: directory-paths
         uses: ./
+        continue-on-error: true
         with:
           paths: test/fixtures/valid/.github/workflows
+
+      - name: Assert directory paths input failed
+        if: steps.directory-paths.outcome != 'failure'
+        run: exit 1
 
       - name: Test invalid fixture
         id: invalid-fixture
