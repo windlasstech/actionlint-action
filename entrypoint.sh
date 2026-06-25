@@ -19,6 +19,17 @@ normalize_bool() {
 	esac
 }
 
+has_glob() {
+	case "$1" in
+		*'*'* | *'?'* | *'['*)
+			return 0
+			;;
+		*)
+			return 1
+			;;
+	esac
+}
+
 input_paths=${INPUT_PATHS:-}
 input_config_file=$(printenv 'INPUT_CONFIG-FILE' 2>/dev/null || printf '%s' "${INPUT_CONFIG_FILE:-}")
 input_ignore=${INPUT_IGNORE:-}
@@ -69,7 +80,28 @@ fi
 while IFS= read -r line || [ -n "$line" ]; do
 	line=${line%"$cr"}
 	if [ -n "$line" ]; then
-		set -- "$@" "$line"
+		path_matches="$tmp_dir/path-matches"
+		: >"$path_matches"
+
+		if [ -d "$line" ]; then
+			find "$line" -type f \( \
+				-path "$line/*.yml" -o \
+				-path "$line/*.yaml" -o \
+				-path '*/.github/workflows/*.yml' -o \
+				-path '*/.github/workflows/*.yaml' \
+			\) | sort >"$path_matches"
+		elif has_glob "$line"; then
+			find . -type f \( -path "./$line" -o -path "$line" \) | sort >"$path_matches"
+		fi
+
+		if [ -s "$path_matches" ]; then
+			while IFS= read -r match || [ -n "$match" ]; do
+				match=${match#./}
+				set -- "$@" "$match"
+			done <"$path_matches"
+		else
+			set -- "$@" "$line"
+		fi
 	fi
 done <"$tmp_dir/paths"
 
