@@ -15,9 +15,11 @@ test/
     │   └── .github/workflows/valid.yml
     ├── invalid/
     │   └── .github/workflows/invalid.yml
-    └── config/
-        ├── .github/workflows/ignored.yml
-        └── .github/actionlint.yaml
+    ├── config/
+    │   ├── .github/workflows/ignored.yml
+    │   └── .github/actionlint.yaml
+    └── dash-leading/
+        └── .github/workflows/valid.yml
 ```
 
 ## 픽스처
@@ -28,6 +30,7 @@ test/
 
 - **목적**: 정상 경로를 검증합니다.
 - **기대 결과**: `actionlint`가 문제 없이 `0`으로 종료합니다.
+- **디렉터리 입력 동작**: `test/fixtures/valid/.github/workflows`를 디렉터리로 전달하면 `actionlint` CLI와 동일하게 실패해야 합니다.
 
 ### `invalid/.github/workflows/invalid.yml`
 
@@ -54,11 +57,18 @@ test/
 - **목적**: config-file 시나리오가 통과하도록 `ignored.yml`의 알려진 오류를 억제합니다.
 - **규칙**: `unexpected key "foo" for "workflow" section`과 일치하는 오류를 무시합니다.
 
+### `dash-leading/.github/workflows/valid.yml`
+
+실행 시 `-dash-leading-valid.yml` 이름으로 복사되는 최소 구성의 유효한 workflow 파일입니다.
+
+- **목적**: `-`로 시작하는 `paths` 항목이 option separator 뒤에 전달되어 `actionlint` flag로 해석될 수 없음을 검증합니다.
+- **기대 결과**: `actionlint`가 문제 없이 `0`으로 종료합니다.
+
 ## 사용 방식
 
 `.github/workflows/actionlint-self-test.yml`의 자체 테스트 워크플로우는 각 픽스처에 대해 로컬 action을 실행하고 기대 결과를 검증합니다. 이를 통해 다음을 보장합니다.
 
-- 필수 입력을 `actionlint` CLI 인자로 올바르게 매핑합니다.
+- 필수 입력을 `actionlint` CLI 인자로 올바르게 매핑하며, 디렉터리 입력은 CLI와 동일하게 실패합니다.
 - `config-file`, `ignore`, `shellcheck`, `pyflakes`, `format`, `no-color`, `oneline` 같은 선택 입력이 문서화한 대로 동작합니다.
 - wrapper가 내부 `actionlint` 프로세스와 동일한 코드로 종료합니다.
 

@@ -6,7 +6,7 @@ branding:
   color: gray-dark
 inputs:
   paths:
-    description: Newline-separated workflow files or directories to lint.
+    description: Newline-separated workflow files or glob patterns to lint. Empty lets actionlint auto-discover workflows.
     required: false
     default: ""
   config-file:

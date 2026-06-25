@@ -22,7 +22,7 @@ For reproducible builds, pin to a full commit SHA:
 - uses: windlasstech/actionlint-action@<sha>
 ```
 
-Run actionlint against specific paths:
+Run actionlint against specific workflow files or glob patterns:
 
 ```yaml
 - uses: windlasstech/actionlint-action@v1
@@ -53,7 +53,7 @@ Disable optional integrations:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `paths` | Newline-separated list of workflow files or directories to lint. Empty lets actionlint auto-discover workflows. | No | `''` |
+| `paths` | Newline-separated list of workflow files or glob patterns to lint. Empty lets actionlint auto-discover workflows. Directory inputs are passed through to actionlint and fail the same way as the CLI. | No | `''` |
 | `config-file` | Path to an actionlint config file. | No | `''` |
 | `ignore` | Newline-separated list of RE2 patterns passed as repeatable `-ignore` flags. | No | `''` |
 | `shellcheck` | Path or command for ShellCheck integration. Passing an explicit empty string disables it. | No | `shellcheck` |

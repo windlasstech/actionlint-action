@@ -15,9 +15,11 @@ test/
     │   └── .github/workflows/valid.yml
     ├── invalid/
     │   └── .github/workflows/invalid.yml
-    └── config/
-        ├── .github/workflows/ignored.yml
-        └── .github/actionlint.yaml
+    ├── config/
+    │   ├── .github/workflows/ignored.yml
+    │   └── .github/actionlint.yaml
+    └── dash-leading/
+        └── .github/workflows/valid.yml
 ```
 
 ## Fixtures
@@ -28,6 +30,7 @@ A minimal, syntactically valid GitHub Actions workflow.
 
 - **Purpose**: Verify the happy path.
 - **Expected outcome**: `actionlint` exits `0` with no findings.
+- **Directory input behavior**: Passing `test/fixtures/valid/.github/workflows` as a directory is expected to fail the same way as the `actionlint` CLI.
 
 ### `invalid/.github/workflows/invalid.yml`
 
@@ -54,11 +57,18 @@ The actionlint configuration file paired with `ignored.yml`.
 - **Purpose**: Suppress the known error in `ignored.yml` so the config-file scenario passes.
 - **Rule**: ignores errors matching `unexpected key "foo" for "workflow" section`.
 
+### `dash-leading/.github/workflows/valid.yml`
+
+A minimal valid workflow file used to create a runtime copy named `-dash-leading-valid.yml`.
+
+- **Purpose**: Verify that `paths` entries starting with `-` are passed after an option separator and cannot be interpreted as `actionlint` flags.
+- **Expected outcome**: `actionlint` exits `0` with no findings.
+
 ## How they are used
 
 The self-test workflow at `.github/workflows/actionlint-self-test.yml` runs the local action against each fixture and asserts the expected outcome. This ensures that:
 
-- Required inputs map correctly to `actionlint` CLI arguments.
+- Required inputs map correctly to `actionlint` CLI arguments, including CLI-equivalent failure for directory inputs.
 - Optional inputs such as `config-file`, `ignore`, `shellcheck`, `pyflakes`, `format`, `no-color`, and `oneline` behave as documented.
 - The wrapper exits with the same code as the underlying `actionlint` process.
 
