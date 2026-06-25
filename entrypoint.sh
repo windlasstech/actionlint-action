@@ -20,12 +20,12 @@ normalize_bool() {
 }
 
 input_paths=${INPUT_PATHS:-}
-input_config_file=${INPUT_CONFIG_FILE:-}
+input_config_file=$(printenv 'INPUT_CONFIG-FILE' 2>/dev/null || printf '%s' "${INPUT_CONFIG_FILE:-}")
 input_ignore=${INPUT_IGNORE:-}
 input_shellcheck=${INPUT_SHELLCHECK-shellcheck}
 input_pyflakes=${INPUT_PYFLAKES-pyflakes}
 input_format=${INPUT_FORMAT:-}
-input_no_color=${INPUT_NO_COLOR:-true}
+input_no_color=$(printenv 'INPUT_NO-COLOR' 2>/dev/null || printf '%s' "${INPUT_NO_COLOR:-true}")
 input_oneline=${INPUT_ONELINE:-false}
 
 no_color=$(normalize_bool no-color "$input_no_color")
