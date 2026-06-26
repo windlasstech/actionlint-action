@@ -6,5 +6,5 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - run: echo $HOME
+      - run: echo "$HOME"
 foo: bar
