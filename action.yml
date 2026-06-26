@@ -1,0 +1,42 @@
+name: actionlint-action
+description: Run actionlint with a Docker-based, digest-pinned wrapper action.
+author: Windlass Inc.
+branding:
+  icon: check-circle
+  color: gray-dark
+inputs:
+  paths:
+    description: Newline-separated workflow files or glob patterns to lint. Empty lets actionlint auto-discover workflows.
+    required: false
+    default: ""
+  config-file:
+    description: Path to an actionlint configuration file.
+    required: false
+    default: ""
+  ignore:
+    description: Newline-separated regular expression patterns to ignore.
+    required: false
+    default: ""
+  shellcheck:
+    description: ShellCheck executable path. Set to an empty string to disable ShellCheck integration.
+    required: false
+    default: shellcheck
+  pyflakes:
+    description: pyflakes executable path. Set to an empty string to disable pyflakes integration.
+    required: false
+    default: pyflakes
+  format:
+    description: Output format for actionlint diagnostics.
+    required: false
+    default: ""
+  no-color:
+    description: Disable colored output.
+    required: false
+    default: "true"
+  oneline:
+    description: Emit one-line diagnostics.
+    required: false
+    default: "false"
+runs:
+  using: docker
+  image: Dockerfile

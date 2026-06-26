@@ -1,0 +1,247 @@
+name: actionlint-action self-test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  self-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Test happy path
+        uses: ./
+        with:
+          paths: test/fixtures/valid/.github/workflows/valid.yml
+
+      - name: Test glob paths input
+        uses: ./
+        with:
+          paths: test/fixtures/valid/.github/workflows/*.yml
+
+      - name: Prepare shell-like glob fixtures
+        run: |
+          mkdir -p test/fixtures/glob-edge/.github/workflows/nested
+          cp test/fixtures/valid/.github/workflows/valid.yml \
+            test/fixtures/glob-edge/.github/workflows/valid.yml
+          cp test/fixtures/invalid/.github/workflows/invalid.yml \
+            test/fixtures/glob-edge/.github/workflows/.hidden-invalid.yml
+          cp test/fixtures/invalid/.github/workflows/invalid.yml \
+            test/fixtures/glob-edge/.github/workflows/nested/invalid.yml
+
+      - name: Test shell-like glob paths input
+        uses: ./
+        with:
+          paths: test/fixtures/glob-edge/.github/workflows/*.yml
+
+      - name: Test explicit dot glob paths input
+        id: explicit-dot-glob
+        uses: ./
+        continue-on-error: true
+        with:
+          paths: test/fixtures/glob-edge/.github/workflows/.*.yml
+
+      - name: Assert explicit dot glob matched hidden workflow
+        if: steps.explicit-dot-glob.outcome != 'failure'
+        run: exit 1
+
+      - name: Test unmatched glob paths input is ignored
+        uses: ./
+        with:
+          paths: |
+            test/fixtures/valid/.github/workflows/*.yml
+            test/fixtures/valid/.github/workflows/*.yaml
+
+      - name: Test multiline paths input
+        uses: ./
+        with:
+          paths: |
+            test/fixtures/valid/.github/workflows/valid.yml
+            test/fixtures/dash-leading/.github/workflows/valid.yml
+
+      - name: Test empty paths auto-discovery
+        uses: ./
+
+      - name: Prepare dash-leading path fixture
+        run: cp test/fixtures/dash-leading/.github/workflows/valid.yml ./-dash-leading-valid.yml
+
+      - name: Test dash-leading paths input
+        uses: ./
+        with:
+          paths: -dash-leading-valid.yml
+
+      - name: Test directory paths input fails like actionlint CLI
+        id: directory-paths
+        uses: ./
+        continue-on-error: true
+        with:
+          paths: test/fixtures/valid/.github/workflows
+
+      - name: Assert directory paths input failed
+        if: steps.directory-paths.outcome != 'failure'
+        run: exit 1
+
+      - name: Test invalid fixture
+        id: invalid-fixture
+        uses: ./
+        continue-on-error: true
+        with:
+          paths: test/fixtures/invalid/.github/workflows/invalid.yml
+
+      - name: Assert invalid fixture failed
+        if: steps.invalid-fixture.outcome != 'failure'
+        run: exit 1
+
+      - name: Test config fixture fails without suppression
+        id: config-fixture-without-suppression
+        uses: ./
+        continue-on-error: true
+        with:
+          paths: test/fixtures/config/.github/workflows/ignored.yml
+
+      - name: Assert config fixture failed without suppression
+        if: steps.config-fixture-without-suppression.outcome != 'failure'
+        run: exit 1
+
+      - name: Test config-file
+        uses: ./
+        with:
+          config-file: test/fixtures/config/.github/actionlint.yaml
+          paths: test/fixtures/config/.github/workflows/ignored.yml
+
+      - name: Test ignore input
+        uses: ./
+        with:
+          ignore: 'unexpected key "foo" for "workflow" section.*'
+          paths: test/fixtures/config/.github/workflows/ignored.yml
+
+      - name: Prepare fake ShellCheck
+        run: |
+          cat >shellcheck <<'EOF'
+          #!/bin/sh
+          cat >/dev/null
+          printf '%s\n' '[{"line":2,"column":1,"level":"error","code":9001,"message":"fake shellcheck diagnostic."}]'
+          EOF
+          chmod +x shellcheck
+
+      - name: Test fake ShellCheck reports diagnostics
+        id: fake-shellcheck-enabled
+        uses: ./
+        continue-on-error: true
+        with:
+          shellcheck: ./shellcheck
+          pyflakes: ""
+          paths: test/fixtures/valid/.github/workflows/valid.yml
+
+      - name: Assert fake ShellCheck diagnostics failed
+        if: steps.fake-shellcheck-enabled.outcome != 'failure'
+        run: exit 1
+
+      - name: Test ShellCheck disable
+        uses: ./
+        env:
+          PATH: /github/workspace:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        with:
+          shellcheck: ""
+          pyflakes: ""
+          paths: test/fixtures/valid/.github/workflows/valid.yml
+
+      - name: Build local action image for output assertions
+        run: docker build --tag actionlint-action:self-test .
+
+      - name: Assert no-color/oneline/format output
+        run: |
+          set +e
+          docker run --rm \
+            --volume "$PWD:/github/workspace" \
+            --workdir /github/workspace \
+            --env INPUT_NO_COLOR=true \
+            --env INPUT_ONELINE=true \
+            --env 'INPUT_FORMAT={{range $err := .}}{{println $err.Message}}{{end}}' \
+            --env INPUT_PATHS=test/fixtures/invalid/.github/workflows/invalid.yml \
+            actionlint-action:self-test >output.txt 2>error.txt
+          status=$?
+          set -e
+
+          if [ "$status" -ne 1 ]; then
+            printf 'expected actionlint exit 1, got %s\n' "$status" >&2
+            cat output.txt >&2
+            cat error.txt >&2
+            exit 1
+          fi
+
+          expected='unexpected key "foo" for "workflow" section. expected one of "concurrency", "defaults", "env", "jobs", "name", "on", "permissions", "run-name"'
+          actual=$(cat output.txt)
+
+          if [ "$actual" != "$expected" ]; then
+            printf 'unexpected formatted output:\n%s\n' "$actual" >&2
+            exit 1
+          fi
+
+          if grep -q $'\033' output.txt error.txt; then
+            printf 'expected no ANSI escape sequences in output\n' >&2
+            exit 1
+          fi
+
+          if [ -s error.txt ]; then
+            printf 'expected empty stderr, got:\n' >&2
+            cat error.txt >&2
+            exit 1
+          fi
+
+      - name: Assert oneline output
+        run: |
+          set +e
+          docker run --rm \
+            --volume "$PWD:/github/workspace" \
+            --workdir /github/workspace \
+            --env INPUT_NO_COLOR=true \
+            --env INPUT_ONELINE=true \
+            --env INPUT_PATHS=test/fixtures/invalid/.github/workflows/invalid.yml \
+            actionlint-action:self-test >output.txt 2>error.txt
+          status=$?
+          set -e
+
+          if [ "$status" -ne 1 ]; then
+            printf 'expected actionlint exit 1, got %s\n' "$status" >&2
+            cat output.txt >&2
+            cat error.txt >&2
+            exit 1
+          fi
+
+          lines=$(wc -l <output.txt)
+
+          if [ "$lines" -ne 1 ]; then
+            printf 'expected one output line, got %s:\n' "$lines" >&2
+            cat output.txt >&2
+            exit 1
+          fi
+
+          if grep -q '|' output.txt; then
+            printf 'expected oneline output without source excerpt, got:\n' >&2
+            cat output.txt >&2
+            exit 1
+          fi
+
+          if [ -s error.txt ]; then
+            printf 'expected empty stderr, got:\n' >&2
+            cat error.txt >&2
+            exit 1
+          fi
