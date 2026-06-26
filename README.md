@@ -1,4 +1,23 @@
+<div align="center">
+
 # actionlint-action
+
+![GitHub License](https://img.shields.io/github/license/windlasstech/actionlint-action)
+[![SemVer Versioning](https://img.shields.io/badge/version_scheme-SemVer-0097a7)](#versioning)
+[![GitHub Release](https://img.shields.io/github/v/release/windlasstech/actionlint-action)](https://github.com/windlasstech/actionlint-action/releases)
+[![GitHub Release Date](https://img.shields.io/github/release-date/windlasstech/actionlint-action)](https://github.com/windlasstech/actionlint-action/releases)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-3.0-4baaaa.svg)](https://github.com/windlasstech/.github/blob/main/CODE_OF_CONDUCT.md)
+[![GitHub issues](https://img.shields.io/badge/issue_tracking-GitHub-blue.svg)](https://github.com/windlasstech/actionlint-action/issues)
+
+[![actionlint-action self-test](https://github.com/windlasstech/actionlint-action/actions/workflows/actionlint-self-test.yml/badge.svg)](https://github.com/windlasstech/actionlint-action/actions/workflows/actionlint-self-test.yml)
+[![CodeQL](https://github.com/windlasstech/actionlint-action/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/windlasstech/actionlint-action/actions/workflows/github-code-scanning/codeql)
+[![OSV Scanner Full](https://github.com/windlasstech/actionlint-action/actions/workflows/osv-scanner-full.yml/badge.svg)](https://github.com/windlasstech/actionlint-action/actions/workflows/osv-scanner-full.yml)
+[![Dependency Review](https://github.com/windlasstech/actionlint-action/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/windlasstech/actionlint-action/actions/workflows/dependency-review.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/windlasstech/actionlint-action/badge)](https://scorecard.dev/viewer/?uri=github.com/windlasstech/actionlint-action)
+
+English | [한국어](README.ko.md)
+
+</div>
 
 Docker-based GitHub Action for running [actionlint](https://github.com/rhysd/actionlint) with SHA-pinned images and Dependabot-managed updates. A hardened, reusable wrapper for Windlass workflows and the broader community.
 
@@ -120,7 +139,7 @@ actionlint reads `.github/actionlint.yaml` or `.github/actionlint.yml` automatic
 
 ## Versioning
 
-This action uses its own Semantic Versioning independent of the upstream actionlint version. Release notes clearly state the embedded actionlint version, for example: `v1.0.0 - includes actionlint v1.7.12`.
+This action uses its own [Semantic Versioning](https://semver.org/) independent of the upstream actionlint version. Release notes clearly state the embedded actionlint version, for example: `v1.0.0 - includes actionlint v1.7.12`.
 
 ## License
 
