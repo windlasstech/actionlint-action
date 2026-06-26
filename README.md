@@ -84,22 +84,22 @@ Disable optional integrations:
 
 - uses: windlasstech/actionlint-action@v1
   with:
-    shellcheck: ''
-    pyflakes: ''
+    shellcheck: ""
+    pyflakes: ""
 ```
 
 ## Inputs
 
-| Input | Description | Required | Default |
-|-------|-------------|----------|---------|
-| `paths` | Newline-separated list of workflow files or glob patterns to lint. Empty lets actionlint auto-discover workflows. Directory inputs are passed through to actionlint and fail the same way as the CLI. | No | `''` |
-| `config-file` | Path to an actionlint config file. | No | `''` |
-| `ignore` | Newline-separated list of RE2 patterns passed as repeatable `-ignore` flags. | No | `''` |
-| `shellcheck` | Path or command for ShellCheck integration. Passing an explicit empty string disables it. | No | `shellcheck` |
-| `pyflakes` | Path or command for Pyflakes integration. Passing an explicit empty string disables it. | No | `pyflakes` |
-| `format` | Go template string passed to `-format`. | No | `''` |
-| `no-color` | Disable ANSI color codes in output. | No | `true` |
-| `oneline` | Print one error per line. | No | `false` |
+| Input         | Description                                                                                                                                                                                           | Required | Default      |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------ |
+| `paths`       | Newline-separated list of workflow files or glob patterns to lint. Empty lets actionlint auto-discover workflows. Directory inputs are passed through to actionlint and fail the same way as the CLI. | No       | `''`         |
+| `config-file` | Path to an actionlint config file.                                                                                                                                                                    | No       | `''`         |
+| `ignore`      | Newline-separated list of RE2 patterns passed as repeatable `-ignore` flags.                                                                                                                          | No       | `''`         |
+| `shellcheck`  | Path or command for ShellCheck integration. Passing an explicit empty string disables it.                                                                                                             | No       | `shellcheck` |
+| `pyflakes`    | Path or command for Pyflakes integration. Passing an explicit empty string disables it.                                                                                                               | No       | `pyflakes`   |
+| `format`      | Go template string passed to `-format`.                                                                                                                                                               | No       | `''`         |
+| `no-color`    | Disable ANSI color codes in output.                                                                                                                                                                   | No       | `true`       |
+| `oneline`     | Print one error per line.                                                                                                                                                                             | No       | `false`      |
 
 ### Glob patterns
 
@@ -117,12 +117,12 @@ Brace expansion and recursive globstar are intentionally unsupported to keep `pa
 
 actionlint returns the following exit codes:
 
-| Code | Meaning |
-|------|---------|
-| `0` | No lint problems found. |
-| `1` | Lint problems found. |
-| `2` | Invalid command-line usage. |
-| `3` | Fatal error (e.g. unable to read files). |
+| Code | Meaning                                  |
+| ---- | ---------------------------------------- |
+| `0`  | No lint problems found.                  |
+| `1`  | Lint problems found.                     |
+| `2`  | Invalid command-line usage.              |
+| `3`  | Fatal error (e.g. unable to read files). |
 
 If an input value is invalid (for example, `no-color: maybe`), the wrapper exits with code `2` and prints a clear error message.
 
