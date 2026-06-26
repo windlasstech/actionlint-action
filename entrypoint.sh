@@ -94,6 +94,8 @@ while IFS= read -r line || [ -n "$line" ]; do
 				match=${match#./}
 				set -- "$@" "$match"
 			done <"$path_matches"
+		elif has_glob "$line"; then
+			:
 		else
 			set -- "$@" "$line"
 		fi
