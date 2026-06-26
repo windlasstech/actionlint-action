@@ -98,7 +98,7 @@ sh tools/run-shfmt.sh --check entrypoint.sh scripts/*.sh tools/*.sh
 shellcheck entrypoint.sh scripts/*.sh tools/*.sh
 
 # Build the Docker image locally
-docker build -t actionlint-action .
+docker build -t actionlint-hardened-action .
 ```
 
 ## NOTES
