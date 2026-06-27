@@ -11,6 +11,7 @@
 
 [![actionlint-hardened self-test](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/actionlint-self-test.yml/badge.svg)](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/actionlint-self-test.yml)
 [![Lint](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/lint.yml/badge.svg)](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/lint.yml)
+[![CodeQL](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/github-code-scanning/codeql)
 [![OSV Scanner Full](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/osv-scanner-full.yml/badge.svg)](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/osv-scanner-full.yml)
 [![Dependency Review](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/windlasstech/actionlint-hardened-action/actions/workflows/dependency-review.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/windlasstech/actionlint-hardened-action/badge)](https://scorecard.dev/viewer/?uri=github.com/windlasstech/actionlint-hardened-action)
@@ -39,14 +40,14 @@ Dependabot을 통해 업스트림에 맞춰 업데이트하는, SHA-pinned 이�
 - uses: windlasstech/actionlint-hardened-action@v1
 ```
 
-재현 가능한 빌드를 위해 전체 커밋 SHA로 고정할 수 있습니다.
+재현 가능한 빌드를 위해 전체 커밋 SHA로 고정할 수 있습니다(선택사항이지만, **권장합니다**).
 
 ```yaml
 - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
   with:
     persist-credentials: false
 
-- uses: windlasstech/actionlint-hardened-action@<sha>
+- uses: windlasstech/actionlint-hardened-action@043a16f2538fe7bee89d8e19bbd5292e925210e0 # v1.0.0
 ```
 
 특정 workflow 파일 또는 glob 패턴에 대해 actionlint를 실행할 수 있습니다.
@@ -56,7 +57,7 @@ Dependabot을 통해 업스트림에 맞춰 업데이트하는, SHA-pinned 이�
   with:
     persist-credentials: false
 
-- uses: windlasstech/actionlint-hardened-action@v1
+- uses: windlasstech/actionlint-hardened-action@043a16f2538fe7bee89d8e19bbd5292e925210e0 # v1.0.0
   with:
     paths: |
       .github/workflows/*.yml
@@ -70,7 +71,7 @@ Dependabot을 통해 업스트림에 맞춰 업데이트하는, SHA-pinned 이�
   with:
     persist-credentials: false
 
-- uses: windlasstech/actionlint-hardened-action@v1
+- uses: windlasstech/actionlint-hardened-action@043a16f2538fe7bee89d8e19bbd5292e925210e0 # v1.0.0
   with:
     config-file: .github/actionlint.yaml
 ```
@@ -82,7 +83,7 @@ Dependabot을 통해 업스트림에 맞춰 업데이트하는, SHA-pinned 이�
   with:
     persist-credentials: false
 
-- uses: windlasstech/actionlint-hardened-action@v1
+- uses: windlasstech/actionlint-hardened-action@043a16f2538fe7bee89d8e19bbd5292e925210e0 # v1.0.0
   with:
     shellcheck: ""
     pyflakes: ""
