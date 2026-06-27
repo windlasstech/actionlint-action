@@ -30,6 +30,9 @@ Docker-based GitHub Action for running [actionlint](https://github.com/rhysd/act
 - Lets Dependabot propose updates when the upstream image changes.
 - [Keeps workflow permissions minimal](https://github.com/windlasstech/.github/blob/main/docs/security/workflow-hardening.md#permission-management) and integrates with [Windlass security scanning workflows](https://github.com/windlasstech/.github#cicd-workflows).
 
+> [!NOTE]
+> This is a [Docker container action](https://docs.github.com/actions/tutorials/use-containerized-services/create-a-docker-container-action), so GitHub Actions builds and runs the container internally. Workflow users do **not** need to install Docker, start a Docker daemon, or add any Docker setup steps before using this action on GitHub-hosted runners.
+
 ## Usage
 
 ```yaml
